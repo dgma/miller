@@ -1,7 +1,7 @@
 {
   "name": "miller",
   "version": "0.0.1",
-  "description": "Simple stateless dapp to spread tokens into multiple accounts",
+  "description": "Simple stateless contract to distribute tokens to multiple accounts",
   "author": "Dzmitry Lahunouski",
   "license": "MIT",
   "repository": {
