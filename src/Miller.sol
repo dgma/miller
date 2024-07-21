@@ -18,20 +18,26 @@ contract Miller is Context {
         address to;
     }
 
-    function distribute(DistributionConfig[] calldata config) external returns (bool) {
+    /// @notice Distributes received ETH to addresses according to configuration
+    /// @dev Atomic execution. Contract will revert all distribution if any withdrawal fails
+    /// @param config - The list of struct defines how many ETH (amount, wei) and to whom (to)
+    /// should be distributed
+    function distribute(DistributionConfig[] calldata config) external {
         for (uint256 i = 0; i < config.length; i++) {
             _withdrawNative(payable(config[i].to), config[i].amount);
         }
         emit Distribute(_msgSender());
-        return true;
     }
 
-    function distributeFixed(uint240 amount, address[] calldata to) external returns (bool) {
+    /// @notice Distributes received ETH to addresses
+    /// @dev Atomic execution. Contract will revert all distribution if any withdrawal fails
+    /// @param amount - How many ETH (wie) should be distributed to each address
+    /// @param to - The recipient's address list
+    function distributeFixed(uint240 amount, address[] calldata to) external {
         for (uint256 i = 0; i < to.length; i++) {
             _withdrawNative(payable(to[i]), amount);
         }
         emit Distribute(_msgSender());
-        return true;
     }
 
     function _withdrawNative(address payable to, uint240 amount) private {
@@ -41,6 +47,19 @@ contract Miller is Context {
         }
     }
 
+    /// @notice Distributes received ERC20 tokens to addresses according to configuration.
+    /// @dev Atomic execution. Contract will revert all distribution if any withdrawal fails.
+    /// @dev Permit (https://eips.ethereum.org/EIPS/eip-2612) is optional. ERC20(token).allow can be
+    /// used. In that case any values for permit can be passed.
+    /// @param config - The list of struct defines how many ether (amount) and to whom (to) should
+    /// be distributed
+    /// @param token - ERC20 token address that should be distributed
+    /// @param permitAmount - The number of tokens to approve with a permit. Should be more or equal
+    /// to the total distributed tokens.
+    /// @param deadline - Permit deadline, block.timestamp (seconds)
+    /// @param v - v of the secp256k1 signarure
+    /// @param r - r of the secp256k1 signarure
+    /// @param s - s of the secp256k1 signarure
     function distributeERC20(
         DistributionConfig[] calldata config,
         address token,
@@ -49,21 +68,28 @@ contract Miller is Context {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public returns (bool) {
-        // Skip ddos transactions
-        // We are not needed in either catching the error or implementing
-        // a success flow. In case of error, we let safeTransferFrom revert
-        try IERC20Permit(token).permit(_msgSender(), address(this), permitAmount, deadline, v, r, s)
-        {} catch {}
+    ) public {
+        _safePermit(token, permitAmount, deadline, v, r, s);
 
         for (uint256 i = 0; i < config.length; i++) {
             _withdrawERC20(config[i].to, IERC20(token), config[i].amount);
         }
         emit Distribute(_msgSender());
-
-        return true;
     }
 
+    /// @notice Distributes received ERC20 tokens to addresses
+    /// @dev Atomic execution. Contract will revert all distribution if any withdrawal fails.
+    /// @dev Permit (https://eips.ethereum.org/EIPS/eip-2612) is optional. ERC20(token).allow can be
+    /// used. In that case any values for permit can be passed.
+    /// @param amount - How many ether should be distributed to each address
+    /// @param to - The recipient's address list
+    /// @param token - ERC20 token address that should be distributed
+    /// @param permitAmount - The number of tokens to approve with a permit. Should be more or equal
+    /// to the total distributed tokens.
+    /// @param deadline - Permit deadline, block.timestamp (seconds)
+    /// @param v - v of the secp256k1 signarure
+    /// @param r - r of the secp256k1 signarure
+    /// @param s - s of the secp256k1 signarure
     function distributeERC20Fixed(
         uint240 amount,
         address[] calldata to,
@@ -73,22 +99,31 @@ contract Miller is Context {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public returns (bool) {
-        // Skip ddos transactions
-        // We are not needed in either catching the error or implementing
-        // a success flow. In case of error, we let safeTransferFrom revert
-        try IERC20Permit(token).permit(_msgSender(), address(this), permitAmount, deadline, v, r, s)
-        {} catch {}
+    ) public {
+        _safePermit(token, permitAmount, deadline, v, r, s);
 
         for (uint256 i = 0; i < to.length; i++) {
             _withdrawERC20(to[i], IERC20(token), amount);
         }
         emit Distribute(_msgSender());
-
-        return true;
     }
 
     function _withdrawERC20(address to, IERC20 erc20token, uint240 amount) private {
         erc20token.safeTransfer(to, amount);
+    }
+
+    function _safePermit(
+        address token,
+        uint240 permitAmount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) private {
+        // Skip ddos transactions
+        // We are not needed in either catching the error or implementing
+        // a success flow. In case of error, we let safeTransferFrom revert
+        try IERC20Permit(token).permit(_msgSender(), address(this), permitAmount, deadline, v, r, s)
+        {} catch {}
     }
 }
