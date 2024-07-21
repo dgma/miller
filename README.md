@@ -1,6 +1,6 @@
-# Sol-starter
+# Miller
 
-Template to bootstrap solidity project
+Simple stateless dapp to spread tokens into multiple accounts
 
 ## Features
 

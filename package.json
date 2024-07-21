@@ -1,7 +1,7 @@
 {
-  "name": "sol-starter",
-  "version": "0.1.1",
-  "description": "Template to bootstrap solidity project with foundry and hardhat",
+  "name": "miller",
+  "version": "0.0.1",
+  "description": "Simple stateless dapp to spread tokens into multiple accounts",
   "author": "Dzmitry Lahunouski",
   "license": "MIT",
   "repository": {
@@ -15,17 +15,17 @@
     "@openzeppelin/contracts": "^5.0.2"
   },
   "devDependencies": {
-    "@dgma/hardhat-sol-bundler": "^0.5.7",
+    "@dgma/hardhat-sol-bundler": "^0.5.8",
     "@nomicfoundation/hardhat-foundry": "^1.1.2",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@types/chai": "^4.3.16",
-    "@types/mocha": ">=10.0.6",
+    "@types/mocha": ">=10.0.7",
     "dotenv": "^16.4.5",
-    "ethers": "^6.12.1",
-    "hardhat": "^2.22.4",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.4",
-    "prettier": "^3.2.5",
+    "ethers": "^6.13.1",
+    "hardhat": "^2.22.6",
+    "husky": "^9.1.1",
+    "lint-staged": "^15.2.7",
+    "prettier": "^3.3.3",
     "solhint": "^5.0.1",
     "solidity-coverage": "^0.8.12"
   }
