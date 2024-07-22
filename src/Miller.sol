@@ -22,7 +22,7 @@ contract Miller is Context {
     /// @dev Atomic execution. Contract will revert all distribution if any withdrawal fails
     /// @param config - The list of struct defines how many ETH (amount, wei) and to whom (to)
     /// should be distributed
-    function distribute(DistributionConfig[] calldata config) external {
+    function distribute(DistributionConfig[] calldata config) external payable {
         for (uint256 i = 0; i < config.length; i++) {
             _withdrawNative(payable(config[i].to), config[i].amount);
         }
@@ -33,7 +33,7 @@ contract Miller is Context {
     /// @dev Atomic execution. Contract will revert all distribution if any withdrawal fails
     /// @param amount - How many ETH (wie) should be distributed to each address
     /// @param to - The recipient's address list
-    function distributeFixed(uint240 amount, address[] calldata to) external {
+    function distributeFixed(uint240 amount, address[] calldata to) external payable {
         for (uint256 i = 0; i < to.length; i++) {
             _withdrawNative(payable(to[i]), amount);
         }
