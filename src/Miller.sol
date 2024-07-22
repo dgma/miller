@@ -109,7 +109,7 @@ contract Miller is Context {
     }
 
     function _withdrawERC20(address to, IERC20 erc20token, uint240 amount) private {
-        erc20token.safeTransfer(to, amount);
+        erc20token.safeTransferFrom(_msgSender(), to, amount);
     }
 
     function _safePermit(
