@@ -9,19 +9,7 @@ module.exports = {
     config: config,
   },
   localhost: { lockFile: "./local.deployment-lock.json", config: config },
-  arbitrumSepolia: {
-    lockFile: "./deployment-lock.json",
-    verify: true,
-    plugins: [VerifyPlugin],
-    config: config,
-  },
-  baseSepolia: {
-    lockFile: "./deployment-lock.json",
-    verify: true,
-    plugins: [VerifyPlugin],
-    config: config,
-  },
-  opSepolia: {
+  mainnet: {
     lockFile: "./deployment-lock.json",
     verify: true,
     plugins: [VerifyPlugin],
