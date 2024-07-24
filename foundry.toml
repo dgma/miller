@@ -15,9 +15,12 @@ remappings = [
 
 [fmt]
 bracket_spacing = false
-line_length = 100
+line_length = 101
 tab_width = 4
 wrap_comments = true
+
+[fuzz]
+runs = 128
 
 # Remappings in remappings.txt
 

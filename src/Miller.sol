@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 error RecipientRevert();
 
-contract Miller is Context {
+contract Miller {
     event Distribute(address initiator);
 
     using SafeERC20 for IERC20;
@@ -23,10 +22,14 @@ contract Miller is Context {
     /// @param config - The list of struct defines how many ETH (amount, wei) and to whom (to)
     /// should be distributed
     function distribute(DistributionConfig[] calldata config) external payable {
-        for (uint256 i = 0; i < config.length; i++) {
+        uint256 length = config.length;
+        for (uint256 i = 0; i < length;) {
             _withdrawNative(payable(config[i].to), config[i].amount);
+            unchecked {
+                ++i;
+            }
         }
-        emit Distribute(_msgSender());
+        emit Distribute(msg.sender);
     }
 
     /// @notice Distributes received ETH to addresses
@@ -34,10 +37,14 @@ contract Miller is Context {
     /// @param amount - How many ETH (wie) should be distributed to each address
     /// @param to - The recipient's address list
     function distributeFixed(uint240 amount, address[] calldata to) external payable {
-        for (uint256 i = 0; i < to.length; i++) {
+        uint256 length = to.length;
+        for (uint256 i = 0; i < length;) {
             _withdrawNative(payable(to[i]), amount);
+            unchecked {
+                ++i;
+            }
         }
-        emit Distribute(_msgSender());
+        emit Distribute(msg.sender);
     }
 
     function _withdrawNative(address payable to, uint240 amount) private {
@@ -70,11 +77,14 @@ contract Miller is Context {
         bytes32 s
     ) public {
         _safePermit(token, permitAmount, deadline, v, r, s);
-
-        for (uint256 i = 0; i < config.length; i++) {
+        uint256 length = config.length;
+        for (uint256 i = 0; i < length;) {
             _withdrawERC20(config[i].to, IERC20(token), config[i].amount);
+            unchecked {
+                ++i;
+            }
         }
-        emit Distribute(_msgSender());
+        emit Distribute(msg.sender);
     }
 
     /// @notice Distributes received ERC20 tokens to addresses
@@ -101,15 +111,18 @@ contract Miller is Context {
         bytes32 s
     ) public {
         _safePermit(token, permitAmount, deadline, v, r, s);
-
-        for (uint256 i = 0; i < to.length; i++) {
+        uint256 length = to.length;
+        for (uint256 i = 0; i < length;) {
             _withdrawERC20(to[i], IERC20(token), amount);
+            unchecked {
+                ++i;
+            }
         }
-        emit Distribute(_msgSender());
+        emit Distribute(msg.sender);
     }
 
     function _withdrawERC20(address to, IERC20 erc20token, uint240 amount) private {
-        erc20token.safeTransferFrom(_msgSender(), to, amount);
+        erc20token.safeTransferFrom(msg.sender, to, amount);
     }
 
     function _safePermit(
@@ -123,7 +136,7 @@ contract Miller is Context {
         // Skip ddos transactions
         // We are not needed in either catching the error or implementing
         // a success flow. In case of error, we let safeTransferFrom revert
-        try IERC20Permit(token).permit(_msgSender(), address(this), permitAmount, deadline, v, r, s)
-        {} catch {}
+        try IERC20Permit(token).permit(msg.sender, address(this), permitAmount, deadline, v, r, s) {}
+            catch {}
     }
 }
